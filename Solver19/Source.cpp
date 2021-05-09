@@ -16,30 +16,95 @@ kind_of_solution Parameters::kind;
 const double pi = 3.1415926535897932384626433832795;
 
 
+/**
+ * \brief узловые точки 
+ */
 const double nodes[] = { -0.989400934991650 , -0.944575023073233,
 -0.865631202387832, -0.755404408355003 , -0.617876244402644 ,
 -0.458016777657227 , -0.281603550779259, -0.950125098376374e-1,
 0.950125098376374e-1 ,0.281603550779259, 0.458016777657227, 0.617876244402644,
 0.755404408355003, 0.865631202387832, 0.944575023073233, 0.989400934991650 };
+
+
+/**
+ * \brief весовые коэффициенты
+ */
 const double weights[] = { 0.0271524594117540, 0.0622535239386475,
 0.0951585116824939, 0.124628971255534, 0.149595988816577, 0.169156519395002,
 0.182603415044922, 0.189450610455068, 0.189450610455068, 0.18260341504492,
 0.16915651939500, 0.14959598881657, 0.124628971255534, 0.0951585116824939,
 0.0622535239386475, 0.0271524594117540 };
 
+
+/**
+ * \brief отыскание интеграла
+ * \param integrand подынтегральное выржение
+ * \param a лева€ граница отрезка 
+ * \param b права€ граница отрезка
+ * \return значение интеграла
+ */
 std::complex<double> evaluate_integral(
-	const std::function<std::complex<double>(double)> integrand, double a = -1,
+	const std::function<std::complex<double>(double)>& integrand, double a = -1,
 	double b = 1);
+
+
+/**
+ * \brief подынтегральное выражение
+ * \param alpha параметр преобразовани€ Ћапласа
+ * \param s параметр преобразовани€ ‘урье
+ * \param t врем€
+ * \return подынтегральное выражение
+ */
 std::complex<double> integrand(std::complex<double> alpha,
 	std::complex<double> s, double t);
+
+/**
+ * \brief контур интегрировани€
+ * \param s параметр преобразовани€ Ћапласа
+ * \param zeta абсцисса контура интегрировани€
+ * \return точка контура
+ */
 std::complex<double> contour(double s, double zeta = 0);
+
+/**
+ * \brief подынтегральное выражение вдольконтура интегрировани€
+ * \param alpha параметр преобразовани€ ‘урье
+ * \param s параметр преобразовани€ Ћапласа
+ * \param t врем€
+ * \return значение
+ */
 std::complex<double> new_integrand(std::complex<double> alpha, double s, double t);
-std::complex<double> back_integrand(std::complex<double> alpha, /*std::complex<double> s,*/ double t, double eps);
-std::complex<double> back_integrands(std::complex<double> alpha, double t, double eps);
 
-/* std::complex<double> Solve1(double s, double t); */
+/**
+ * \brief обратное преобразование Ћапласа
+ * \param alpha параметр преобразовани€ ‘урье
+ * \param t врем€
+ * \param eps точность вычислений
+ * \return значение обратной трансформанты
+ */
+std::complex<double> back_integrand(std::complex<double> alpha, double t, 
+	double eps);
+
+/**
+ * \brief обратное преобразование Ћапласа в однородном случае (аналитическое
+ * выражение)
+ * \param alpha параметр преобразовани€ ‘урье
+ * \param t врем€
+ * \param eps точность вычислений
+ * \return значение
+ */
+std::complex<double> back_integrands(std::complex<double> alpha, double t, 
+	double eps);
 
 
+/**
+ * \brief добавить кривую на график
+ * \param step шаг
+ * \param complexValuedVector вектор
+ * \param mapping отображение
+ * \param stream файловый поток
+ * \param a лева€ граница отрезка
+ */
 void showVector(double step,
 	const std::vector<std::complex<double>>& complexValuedVector,
 	const std::function<double(std::complex<double>)>& mapping, std::ostream& stream, double a = 0)
@@ -51,6 +116,14 @@ void showVector(double step,
 	}
 }
 
+/**
+ * \brief  добавить кривую на график
+ * \param step шаг
+ * \param fieldHomogeneous вектор
+ * \param stream файловый поток
+ * \param color цвет
+ * \param a лева€ граница
+ */
 void addTheCurve(double step, const std::vector<std::complex<double>>& fieldHomogeneous,
 	std::ofstream& stream, const std::string& color, double a = 0)
 {
@@ -66,7 +139,13 @@ void addTheCurve(double step, const std::vector<std::complex<double>>& fieldHomo
 	stream << " };\n";
 }
 
-
+/**
+ * \brief построить диаграмму
+ * \param step шаг
+ * \param vectors набор векторов
+ * \param fileName им€ файла
+ * \param a лева€ граница
+ */
 void plotTheWaveField(double step, const std::map<std::string,
 	std::vector<std::complex<double>>>& vectors, const std::string& fileName, double a = 0)
 {
@@ -112,7 +191,7 @@ int main()
 }
 
 // квадратурна€ формула √аусса
-std::complex<double> evaluate_integral(const std::function<std::complex<double>(double)> integrand, double a, double b)
+std::complex<double> evaluate_integral(const std::function<std::complex<double>(double)>& integrand, double a, double b)
 {
 	std::complex<double> value = 0;
 	const size_t size = sizeof(nodes) / sizeof(double);
@@ -172,32 +251,17 @@ std::complex<double> back_integrands(std::complex<double> alpha, double t, doubl
 	return sm;
 }
 
-
-//std::complex<double> back_integrands(std::complex<double> alpha, /*std::complex<double> s,*/ double t, double eps)
-/*
-{
-std::complex<double> sum = { 0.0, 0.0 };
-const auto sqr = sqrt((alpha * alpha) + (((2 - 1) * pi) / 2) * (((2 - 1) * pi) / 2));
-return 2 * sin(((2 - 1) / 2) * (pi)) * ((sin(t * sqr)) / (sqr));
-}
-*/
-
-
-
-// контур интегрировани€
 std::complex<double> contour(double s, double zeta)
 {
 	return{ zeta, s };
 }
 
-// интеграл по контуру
 std::complex<double> new_integrand(std::complex<double> alpha, double s, double t)
 {
-	std::complex<double>point = contour(s, 0.1);
+	const std::complex<double> point = contour(s, 0.1);
 	return integrand(alpha, point, t);
 }
 
-// ќбратное преобразование Ћапласа
 std::complex<double> back_integrand(std::complex<double> alpha, /*std::complex<double> s,*/ double t, double eps)
 {
 	std::complex<double> sum = { 0.0, 0.0 };
