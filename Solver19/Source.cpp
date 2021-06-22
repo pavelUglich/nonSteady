@@ -5,6 +5,8 @@
 #include "plots.h"
 #include <iomanip>
 #include "OdeSolver.h"
+#include <omp.h>
+
 
 using namespace std;
 
@@ -161,29 +163,28 @@ void plotTheWaveField(double step, const std::map<std::string,
 	stream.close();
 }
 
+std::complex<double> analytical(std::complex<double> alpha, std::complex<double> s, double t);
 
 int main()
 {
 	setlocale(0, "");
 	Parameters::kind = FIRST;
 	const auto t = 1.0;
-	const double b = 5.0;
-	const double h = 0.1;
-	double eps = 0.000001;
-
+	const double b = 10.0;
+	const double h = 0.2;
+	double eps = 0.001;
+	const std::complex<double> alpha = { 1,0 };
 	std::vector<std::complex<double>> vector;
 	std::vector<std::complex<double>> vector1;
-
+	std::vector<std::complex<double>> vector2;
 	for (double a = 0.0; a < b; a += h)
 	{
 		std::complex<double> alpha = { a,0 };
-		//std::complex<double> alpha = { a,1 };
-		//const auto value = evaluate_integral([=](double s) {return new_integrand(alpha, s, t); }, 0, 2 * pi / t);		
-		vector.push_back(back_integrands(alpha, t, 0.0001));
+		//vector.push_back(back_integrands(alpha, t, eps));
 		vector1.push_back(back_integrand(alpha, t, eps));
 	}
 
-	plotTheWaveField(h, { { "black", vector }, { "red", vector1 } }, "1.txt");
+	plotTheWaveField(h, { {"black", vector1}/*, {"red", vector1}*/}, "xxx.txt");
 
 
 	system("pause");
@@ -194,8 +195,10 @@ std::complex<double> evaluate_integral(const std::function<std::complex<double>(
 {
 	std::complex<double> value = 0;
 	const size_t size = sizeof(nodes) / sizeof(double);
+	//#pragma omp for
 	for (size_t i = 0; i < size; i++)
 	{
+		//cout << i << " ";
 		double x = (a + b) / 2 + (b - a) / 2 * nodes[i];
 		value += weights[i] * integrand(x);
 	}
@@ -225,7 +228,7 @@ std::complex<double> analytical(std::complex<double> alpha, std::complex<double>
 	const auto e = exp(gamma);
 	const auto sh = (e - 1.0 / e) / 2.0;
 	const auto ch = (e + 1.0 / e) / 2.0;
-	return  exp(s * t) * (1.0 / s / s) * sh / (gamma * ch);
+	return  /*exp(s * t) **/ (1.0 / s) * sh / (gamma * ch);
 }
 
 //Условные вычисления
