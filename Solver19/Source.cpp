@@ -6,6 +6,8 @@
 #include <iomanip>
 #include "OdeSolver.h"
 #include <omp.h>
+#include <ctime>
+
 
 
 using namespace std;
@@ -171,20 +173,22 @@ int main()
 	Parameters::kind = FIRST;
 	const auto t = 1.0;
 	const double b = 10.0;
-	const double h = 0.2;
 	double eps = 0.001;
+	const size_t length = 50;
+	const double h = b / length;
 	const std::complex<double> alpha = { 1,0 };
-	std::vector<std::complex<double>> vector;
-	std::vector<std::complex<double>> vector1;
-	std::vector<std::complex<double>> vector2;
-	for (double a = 0.0; a < b; a += h)
+	std::vector<std::complex<double>> vector(length);
+	unsigned int start_time = clock(); // начальное время
+	#pragma omp parallel for
+	for (size_t i = 1; i <= length; i++)
 	{
-		std::complex<double> alpha = { a,0 };
-		//vector.push_back(back_integrands(alpha, t, eps));
-		vector1.push_back(back_integrand(alpha, t, eps));
+		std::complex<double> alpha = { i*h,0 };
+		vector[i - 1] = back_integrand(alpha, t, eps);
+		cout << i << " \n";
 	}
-
-	plotTheWaveField(h, { {"black", vector1}/*, {"red", vector1}*/}, "xxx.txt");
+	unsigned int end_time = clock(); // начальное время
+	cout << end_time - start_time << endl;
+	plotTheWaveField(h, { {"black", vector}/*, {"red", vector1}*/}, "xxx.txt");
 
 
 	system("pause");
@@ -195,10 +199,9 @@ std::complex<double> evaluate_integral(const std::function<std::complex<double>(
 {
 	std::complex<double> value = 0;
 	const size_t size = sizeof(nodes) / sizeof(double);
-	//#pragma omp for
+	#pragma omp parallel for
 	for (size_t i = 0; i < size; i++)
 	{
-		//cout << i << " ";
 		double x = (a + b) / 2 + (b - a) / 2 * nodes[i];
 		value += weights[i] * integrand(x);
 	}

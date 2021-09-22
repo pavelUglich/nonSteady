@@ -2,7 +2,7 @@
 #include <vector>
 #include <functional>
 #include <map>
-
+#include <omp.h>
 #include "OdeSolver.h"
 #include "Parameters.h"
 
@@ -64,6 +64,7 @@ boundary_value_problem<T>::cauchy_problem_solutions() const
 	const auto size = conditions[0].size();
 	std::vector<std::vector<T>> solutions;
 	OdeSolver<T> ode_solver(_equations, this->_epsilon, RKF_78);
+	#pragma omp parallel for
 	for (size_t i = 0; i < size; i++)
 	{
 		std::vector<T> initials(_equations.size());

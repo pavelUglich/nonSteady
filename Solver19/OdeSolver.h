@@ -6,6 +6,8 @@
 #include "ButcherTableau.h"
 #include <stdexcept>
 #include "vector_ops.h"
+#include <omp.h>
+
 
 enum tableau {
 	HEUN, BOGACKI_SHAMPINE, CASH_CARP, RUNGE_KUTTA_FELDBERG,
@@ -33,6 +35,9 @@ class OdeSolver
 		_equations;
 	double _epsilon;
 	std::vector<std::vector<double>> _butcher_tableau;	
+	std::vector<T> evaluate_u(
+		const std::vector<T>& initial_conditions, double a, double h);
+
 	std::vector<std::vector<T>> evaluate_k(
 		const std::vector<T>& initial_conditions, double a, double h);
 	std::pair<std::vector<T>, std::vector<T>> evaluate_uh(
@@ -52,17 +57,26 @@ public:
 		const std::vector<T>& initial_conditions);
 };
 
+
+
+template<class T>
+std::vector<T> OdeSolver<T>::evaluate_u(const std::vector<T>& initial_conditions, double a, double h)
+{
+	std::vector<T> vector(_equations.size());
+	#pragma omp parallel for
+	for (size_t i = 0; i < _equations.size(); i++)
+	{
+		vector[i] = h * _equations[i](a, initial_conditions);
+	}
+	return vector;
+}
+
 template <class T>
 std::vector<std::vector<T>> OdeSolver<T>::evaluate_k(
 	const std::vector<T>& initial_conditions, double a, double h)
 {
 	std::vector<std::vector<T>> result;
-	std::vector<T> vector(_equations.size());
-	for (size_t i = 0; i < _equations.size(); i++)
-	{
-		vector[i] = h * _equations[i](a, initial_conditions);
-	}
-	result.push_back(vector);
+	result.push_back(evaluate_u(initial_conditions, a, h));
 	for (size_t i = 0; i < _butcher_tableau.size() - 2; i++)
 	{
 		const double xx = a + _butcher_tableau[i][0] * h;
@@ -74,11 +88,7 @@ std::vector<std::vector<T>> OdeSolver<T>::evaluate_k(
 				uh[ii] += _butcher_tableau[i][iii + 1] * result[iii][ii];
 			}
 		}
-		for (size_t ii = 0; ii < _equations.size(); ii++)
-		{
-			vector[ii] = h * _equations[ii](xx, uh);
-		}
-		result.push_back(vector);
+		result.push_back(evaluate_u(uh, xx, h));
 	}
 	return result;
 }
