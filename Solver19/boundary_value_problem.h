@@ -65,7 +65,7 @@ boundary_value_problem<T>::cauchy_problem_solutions() const
 	std::vector<std::vector<T>> solutions;
 	OdeSolver<T> ode_solver(_equations, this->_epsilon, RKF_78);
 	#pragma omp parallel for
-	for (size_t i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		std::vector<T> initials(_equations.size());
 		for (size_t ii = 0; ii < initials.size(); ii++)

@@ -64,7 +64,7 @@ std::vector<T> OdeSolver<T>::evaluate_u(const std::vector<T>& initial_conditions
 {
 	std::vector<T> vector(_equations.size());
 	#pragma omp parallel for
-	for (size_t i = 0; i < _equations.size(); i++)
+	for (int i = 0; i < _equations.size(); i++)
 	{
 		vector[i] = h * _equations[i](a, initial_conditions);
 	}

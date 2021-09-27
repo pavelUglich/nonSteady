@@ -1,6 +1,4 @@
-﻿  Parameters.cpp
-  plots.cpp
-  Source.cpp
-  vector_ops.cpp
-  Generating Code...
-  Solver19.vcxproj -> C:\Users\user\source\repos\pavelUglich\nonSteady\x64\Debug\Solver19.exe
+﻿  Source.cpp
+  integrals.cpp
+  Создание кода...
+  Solver19.vcxproj -> C:\Users\Сектор ОЗ\source\repos\nonSteady_\x64\Debug\Solver19.exe
