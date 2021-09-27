@@ -53,7 +53,6 @@ void addTheCurve(double step, const std::vector<std::complex<double>>& fieldHomo
  * \param fileName имя файла
  * \param a левая граница
  */
-void plotTheWaveField(double step, const std::map<std::string,
-                                                  std::vector<std::complex<double>>>& vectors,
+void plotTheWaveField(double step, const std::map<std::string,   std::vector<std::complex<double>>>& vectors,
                       const std::string& fileName, double a = 0);
 

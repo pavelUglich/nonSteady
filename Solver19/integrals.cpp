@@ -18,8 +18,8 @@ std::complex<double> evaluate_integral(const std::function<std::complex<double>(
 
 std::complex<double> integrand(std::complex<double> alpha, std::complex<double> s, double t)
 {
-	const std::function<double(double)> mu = [](double x) {return exp(-x); };
-	const std::function<double(double)> rho = [](double x) {return 1; };
+	const std::function<double(double)> mu = [](double x) {return 1.0; };
+	const std::function<double(double)> rho = [](double x) {return 1.0; };
 	const boundary_value_problem<std::complex<double>> bvp = { // создаётся объект типа краевая задача
 		{
 			[=](double x, const std::vector<std::complex<double>>& v) {return 1 / mu(x) * v[1]; }, // правые части уравнений системы
@@ -38,7 +38,7 @@ std::complex<double> new_integrand(std::complex<double> alpha, double s, double 
 {
 	const std::complex<double> I = { 0,1 };
 	const std::complex<double> point = contour(s, 0.5);
-	return integrand(alpha, point, t) * exp(0.5) * (cos(s) + I * sin(s)) * I;
+	return integrand(alpha, point, t) * exp(0.5*t) * (cos(s*t) + I * sin(s*t)) * I;
 }
 
 
@@ -51,7 +51,7 @@ std::complex<double> back_integrand(std::complex<double> alpha, double t, double
 	while (value.real() * value.real() + value.imag() * value.imag() > eps * eps)
 	{
 		sum += value;
-		if (i >= 1000) break;
+		if (i >= 10000) break;
 		auto x = evaluate_integral([=](double s) {return new_integrand(alpha, s, t); }, pi * i / t, pi * (i + 2) / t);
 		auto y = evaluate_integral([=](double s) {return new_integrand(alpha, s, t); }, -pi * (i + 2) / t, -pi * i / t);
 		value = x + y;
